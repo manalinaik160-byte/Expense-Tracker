@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Expense Tracker</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["system-ui", "ui-sans-serif", "Inter", "sans-serif"],
+            },
+            boxShadow: {
+              glow: "0 0 25px rgba(168, 85, 247, 0.45)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-purple-500 via-pink-400 to-orange-300 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-10 font-sans transition-colors duration-500 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950"
+  >
+    <div class="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8">
+      <!-- Header -->
+      <header
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+      >
+        <div>
+          <h1
+            class="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-purple-200 via-pink-200 to-orange-200 bg-clip-text text-transparent drop-shadow-sm"
+          >
+            Smart Expense Tracker
+          </h1>
+          <p class="text-xs sm:text-sm md:text-base text-purple-100/80 mt-1">
+            Track and manage your daily spending with a modern finance
+            dashboard.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3 justify-end">
+          <button
+            id="themeToggle"
+            type="button"
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-glow hover:-translate-y-0.5"
+          >
+            <span class="hidden sm:inline">Dark Mode</span>
+            <span
+              id="themeToggleIcon"
+              class="flex h-6 w-6 items-center justify-center rounded-full bg-black/10 text-yellow-300"
+            >
+              ☀
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Cards -->
+      <section
+        class="grid grid-cols-1 md:grid-cols-3 gap-6"
+        aria-label="Summary statistics"
+      >
+        <!-- Total Expenses -->
+        <article
+          class="group rounded-3xl bg-white/10 dark:bg-slate-900/40 border border-white/20 dark:border-slate-700/60 shadow-lg backdrop-blur-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 text-white shadow-lg"
+            >
+              💰
+            </div>
+            <span
+              class="text-xs font-medium uppercase tracking-wide text-purple-100/80"
+              >Total Expenses</span
+            >
+          </div>
+          <div class="space-y-1">
+            <p
+              id="totalExpenses"
+              class="text-3xl font-extrabold text-white drop-shadow-sm"
+            >
+              ₹0
+            </p>
+            <p class="text-xs text-purple-100/80">
+              Sum of all recorded transactions.
+            </p>
+          </div>
+        </article>
+
+        <!-- Total Transactions -->
+        <article
+          class="group rounded-3xl bg-white/10 dark:bg-slate-900/40 border border-white/20 dark:border-slate-700/60 shadow-lg backdrop-blur-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 text-white shadow-lg"
+            >
+              📊
+            </div>
+            <span
+              class="text-xs font-medium uppercase tracking-wide text-blue-100/80"
+              >Total Transactions</span
+            >
+          </div>
+          <div class="space-y-1">
+            <p
+              id="totalTransactions"
+              class="text-3xl font-extrabold text-white drop-shadow-sm"
+            >
+              0
+            </p>
+            <p class="text-xs text-blue-100/80">
+              Number of expenses you have logged.
+            </p>
+          </div>
+        </article>
+
+        <!-- Highest Category -->
+        <article
+          class="group rounded-3xl bg-white/10 dark:bg-slate-900/40 border border-white/20 dark:border-slate-700/60 shadow-lg backdrop-blur-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <div
+              class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg"
+            >
+              🏆
+            </div>
+            <span
+              class="text-xs font-medium uppercase tracking-wide text-emerald-100/80"
+              >Highest Category</span
+            >
+          </div>
+          <div class="space-y-1">
+            <p
+              id="highestCategory"
+              class="text-xl font-semibold text-white drop-shadow-sm"
+            >
+              –
+            </p>
+            <p class="text-xs text-emerald-100/80">
+              Category with the highest total spending.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Form + Controls -->
+      <section
+        class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start"
+        aria-label="Expense input and controls"
+      >
+        <!-- Expense Form -->
+        <div
+          class="xl:col-span-2 rounded-3xl bg-white/20 dark:bg-slate-900/50 border border-white/20 dark:border-slate-700/70 shadow-lg backdrop-blur-xl p-4 sm:p-6 space-y-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-xs"
+              >+</span
+            >
+            Add New Expense
+          </h2>
+
+          <form
+            id="expenseForm"
+            class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-1"
+          >
+            <div class="md:col-span-2">
+              <label
+                for="expenseName"
+                class="block text-xs font-medium text-purple-100/90 mb-1"
+                >Expense Name</label
+              >
+              <input
+                id="expenseName"
+                type="text"
+                placeholder="e.g. Grocery shopping"
+                class="w-full rounded-2xl border border-white/20 bg-white/20 dark:bg-slate-900/60 px-3 py-2.5 text-sm text-white placeholder:text-purple-100/60 shadow-inner focus:outline-none focus:ring-2 focus:ring-purple-300/70 focus:border-transparent transition-all duration-300"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                for="expenseAmount"
+                class="block text-xs font-medium text-purple-100/90 mb-1"
+                >Amount</label
+              >
+              <input
+                id="expenseAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 250"
+                class="w-full rounded-2xl border border-white/20 bg-white/20 dark:bg-slate-900/60 px-3 py-2.5 text-sm text-white placeholder:text-purple-100/60 shadow-inner focus:outline-none focus:ring-2 focus:ring-pink-300/70 focus:border-transparent transition-all duration-300"
+                required
+              />
+            </div>
+
+            <div>
+              <label
+                for="expenseCategory"
+                class="block text-xs font-medium text-purple-100/90 mb-1"
+                >Category</label
+              >
+              <select
+                id="expenseCategory"
+                class="w-full rounded-2xl border border-white/20 bg-white/20 dark:bg-slate-900/60 px-3 py-2.5 text-sm text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-300/70 focus:border-transparent transition-all duration-300"
+              >
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Bills">Bills</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-4 flex flex-wrap gap-3 justify-between">
+              <p
+                id="formError"
+                class="text-xs text-red-200 font-medium min-h-[1rem]"
+              ></p>
+              <button
+                type="submit"
+                class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-pink-500/40 transition-all duration-300 hover:shadow-glow hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-500/40 focus:ring-white/80"
+              >
+                Add Expense
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filter + Export -->
+        <div
+          class="rounded-3xl bg-white/15 dark:bg-slate-900/50 border border-white/20 dark:border-slate-700/70 shadow-lg backdrop-blur-xl p-4 sm:p-6 space-y-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <h2 class="text-lg font-semibold text-white">Controls</h2>
+          <div class="space-y-3">
+            <div>
+              <label
+                for="filterCategory"
+                class="block text-xs font-medium text-purple-100/90 mb-1"
+                >Filter by Category</label
+              >
+              <select
+                id="filterCategory"
+                class="w-full rounded-2xl border border-white/20 bg-white/20 dark:bg-slate-900/60 px-3 py-2.5 text-sm text-white shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-300/70 focus:border-transparent transition-all duration-300"
+              >
+                <option value="All">All Categories</option>
+                <option value="Food">Food</option>
+                <option value="Transport">Transport</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Bills">Bills</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <button
+              id="exportCsv"
+              type="button"
+              class="w-full inline-flex items-center justify-center rounded-2xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-glow hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/80"
+            >
+              Export Expenses (CSV)
+            </button>
+
+            <p class="text-[11px] text-purple-100/80">
+              Your expenses and theme preference are stored locally in your
+              browser and will be restored automatically when you revisit.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Table + Chart -->
+      <section
+        class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
+        aria-label="Expense list and chart"
+      >
+        <!-- Expense Table -->
+        <div
+          class="lg:col-span-2 rounded-3xl bg-white/15 dark:bg-slate-900/50 border border-white/20 dark:border-slate-700/70 shadow-lg backdrop-blur-xl p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-white">Expense History</h2>
+            <span
+              class="text-[11px] text-purple-100/80"
+              id="tableSummary"
+            ></span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-left text-purple-100/90">
+              <thead>
+                <tr
+                  class="text-xs uppercase tracking-wide text-purple-100/70 border-b border-white/10"
+                >
+                  <th class="py-2 pr-3 font-medium">Name</th>
+                  <th class="py-2 px-3 font-medium">Category</th>
+                  <th class="py-2 px-3 font-medium text-right">Amount</th>
+                  <th class="py-2 px-3 font-medium">Date</th>
+                  <th class="py-2 pl-3 text-right font-medium">Action</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody" class="divide-y divide-white/10">
+                <!-- Rows will be injected here -->
+              </tbody>
+            </table>
+          </div>
+          <p
+            id="noExpensesMessage"
+            class="mt-4 text-xs text-purple-100/70 text-center hidden"
+          >
+            No expenses yet. Start by adding your first record above.
+          </p>
+        </div>
+
+        <!-- Chart -->
+        <div
+          class="rounded-3xl bg-white/15 dark:bg-slate-900/50 border border-white/20 dark:border-slate-700/70 shadow-lg backdrop-blur-xl p-4 sm:p-6 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-white">
+              Spending by Category
+            </h2>
+          </div>
+          <div class="relative h-64">
+            <canvas id="expenseChart"></canvas>
+          </div>
+          <p class="text-[11px] text-purple-100/80">
+            The chart shows how your total spending is distributed across
+            categories. It updates automatically as you add or remove
+            expenses.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
+
